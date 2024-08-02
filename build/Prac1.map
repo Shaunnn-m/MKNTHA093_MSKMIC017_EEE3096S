@@ -1792,7 +1792,7 @@ LOAD C:/ST/STM32CubeIDE_1.16.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
  .debug_line    0x00008f24      0x82c build/stm32f0xx_ll_utils.o
  .debug_line    0x00009750       0x77 build/startup_stm32f051x8.o
 
-.debug_str      0x00000000     0x2961
+.debug_str      0x00000000     0x299f
  .debug_str     0x00000000      0xad3 build/main.o
                                 0xbc8 (size before relaxing)
  .debug_str     0x00000ad3       0x6d build/stm32f0xx_it.o
@@ -1813,8 +1813,7 @@ LOAD C:/ST/STM32CubeIDE_1.16.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
                                 0x6f1 (size before relaxing)
  .debug_str     0x00002687      0x2a8 build/stm32f0xx_ll_utils.o
                                 0x5e4 (size before relaxing)
- .debug_str     0x0000292f       0x32 build/startup_stm32f051x8.o
-                                 0x67 (size before relaxing)
+ .debug_str     0x0000292f       0x70 build/startup_stm32f051x8.o
 
 .comment        0x00000000       0x43
  .comment       0x00000000       0x43 build/main.o

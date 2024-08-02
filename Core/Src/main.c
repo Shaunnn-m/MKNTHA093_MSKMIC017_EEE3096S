@@ -32,6 +32,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define NUM_PATTERNS 9
+#define DEFAULT_DELAY 1000 // 1 second in milliseconds
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -43,9 +45,19 @@
 TIM_HandleTypeDef htim16;
 
 /* USER CODE BEGIN PV */
-// TODO: Define input variables
-
-
+const uint8_t patterns[9][8] = {
+    {1, 1, 1, 0, 1, 0, 0, 1}, // Pattern 1
+    {1, 1, 0, 1, 0, 0, 1, 0}, // Pattern 2
+    {1, 0, 1, 0, 0, 1, 0, 0}, // Pattern 3
+    {0, 1, 0, 0, 1, 0, 0, 0}, // Pattern 4
+    {1, 0, 0, 1, 0, 0, 0, 0}, // Pattern 5
+    {0, 0, 1, 0, 0, 0, 0, 0}, // Pattern 6
+    {0, 1, 0, 0, 0, 0, 0, 0}, // Pattern 7
+    {1, 0, 0, 0, 0, 0, 0, 0}, // Pattern 8
+    {0, 0, 0, 0, 0, 0, 0, 0}  // Pattern 9
+};
+uint8_t pattern_index = 0;
+uint32_t timer_delay = DEFAULT_DELAY; // Default delay
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -54,11 +66,40 @@ static void MX_GPIO_Init(void);
 static void MX_TIM16_Init(void);
 /* USER CODE BEGIN PFP */
 void TIM16_IRQHandler(void);
+void DisplayPattern(uint8_t pattern_index);
+void CheckPushbuttons(void);
+void UpdateTimerDelay(uint32_t delay);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void DisplayPattern(uint8_t pattern_index) {
+    for (int i = 0; i < 8; i++) {
+        HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0 << i, patterns[pattern_index][i] ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    }
+}
 
+void CheckPushbuttons(void) {
+    if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_0) == GPIO_PIN_RESET) {
+        UpdateTimerDelay(500); // 0.5 seconds
+    }
+    if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_1) == GPIO_PIN_RESET) {
+        UpdateTimerDelay(2000); // 2 seconds
+    }
+    if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2) == GPIO_PIN_RESET) {
+        UpdateTimerDelay(1000); // 1 second
+    }
+    if (HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_3) == GPIO_PIN_RESET) {
+        pattern_index = 0; // Reset to pattern 1
+    }
+}
+
+void UpdateTimerDelay(uint32_t delay) {
+    timer_delay = delay;
+    __HAL_TIM_SET_AUTORELOAD(&htim16, delay - 1);
+    HAL_TIM_Base_Stop_IT(&htim16);
+    HAL_TIM_Base_Start_IT(&htim16);
+}
 /* USER CODE END 0 */
 
 /**
@@ -89,22 +130,18 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
-
-  // TODO: Start timer TIM16
-
+  HAL_TIM_Base_Start_IT(&htim16); // Starting timer 16
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
   while (1)
   {
+    CheckPushbuttons(); // Check the pushbuttons state
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
-    // TODO: Check pushbuttons to change timer delay
-    
-    
 
   }
   /* USER CODE END 3 */
@@ -164,7 +201,7 @@ static void MX_TIM16_Init(void)
   htim16.Instance = TIM16;
   htim16.Init.Prescaler = 8000-1;
   htim16.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim16.Init.Period = 1000-1;
+  htim16.Init.Period = timer_delay - 1;
   htim16.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim16.Init.RepetitionCounter = 0;
   htim16.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
@@ -321,13 +358,13 @@ static void MX_GPIO_Init(void)
 // Timer rolled over
 void TIM16_IRQHandler(void)
 {
-	// Acknowledge interrupt
-	HAL_TIM_IRQHandler(&htim16);
+    // Acknowledge interrupt
+    HAL_TIM_IRQHandler(&htim16);
 
-	// TODO: Change LED pattern
-	// print something
+    // Change LED pattern
+    DisplayPattern(pattern_index);
+    pattern_index = (pattern_index + 1) % NUM_PATTERNS; // Cycle through patterns
 
-  
 }
 
 /* USER CODE END 4 */
